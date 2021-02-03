@@ -1,0 +1,69 @@
+---
+runtime: shiny
+title: Proiect Prob. si Stat.
+output: html_document
+author: Tica Constantin & Andronie Iustinian
+---
+
+```{r setup, include=FALSE}
+source("Random Variables/Discrete/Binomiala.R")
+source("Random Variables/Discrete/Bernoulli.R")
+source("Random Variables/Discrete/Hipergeom.R")
+source("Random Variables/Discrete/Uniforma.R")
+source("Random Variables/Discrete/Geometrica.R")
+source("Random Variables/Discrete/NegativBinomiala.R")
+```
+---
+
+```{r echo=FALSE}
+
+```
+
+
+```{r echo=FALSE}
+fluidPage(
+    
+    fluidRow(
+        column(4,
+               h3("Tipul Variabilei Aleatoare:")
+        ),
+        column(8, 
+               selectInput("vaType", "fgfdhdfh", c("Discreta" = "disc", "Continua" = "cont"))
+        )
+    ),
+    
+    #DISCRETE
+    conditionalPanel(
+        condition = "input.vaType == 'disc'",
+        
+        fluidRow(
+            column(4,
+                   h3("Tipul V.A. Discrete:")
+            ),
+            column(8, 
+                   selectInput("vaDiscType", "",
+                               c("Binomiala" = "binom",
+                                 "Neg Binomiala" = "nbinom",
+                                 "Hipergeometrica" = "hiper",
+                                 "Uniforma"  = "unif",
+                                 "Geometrica" = "geom",
+                                 "Bernoulli" = "bern"))
+            )
+        ),
+        
+        conditionalPanel(condition = "input.vaDiscType == 'bern'", Bernoulli("bern", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'binom'", Binomiala("binom", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'hiper'", Hipergeom("hiper", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'unif'", Uniforma("unif", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'geom'", Geometrica("geom", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'nbinom'", NegBinomiala("nbinom", input, output)),
+    ),
+    
+    # MENIU CONTINUE
+    # CONTINUE
+)
+```
+
+
+
+
