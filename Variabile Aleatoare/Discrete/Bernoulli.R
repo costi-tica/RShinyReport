@@ -1,10 +1,10 @@
 library(shiny)
 
-I_BernoulliParams <- function(id){
+I_DiscBernoulliParams <- function(id){
     # parametru P
     column(6, sliderInput(paste(id, "_p", sep =""), "p:", min = 0, max = 1, 0.5, 0.01))
 }
-O_BernoulliFuncMasa <- function(input){
+O_DiscBernoulliFuncMasa <- function(input){
     renderPlot({
         F_mas = function(x){ if (x == 0) 1 - input$bern_p else if (x == 1) input$bern_p else 0 }
         barplot(c(F_mas(0), F_mas(1)),
@@ -14,7 +14,7 @@ O_BernoulliFuncMasa <- function(input){
         )
     })
 }
-O_BernoulliFuncRep <- function(input){
+O_DiscBernoulliFuncRep <- function(input){
     tagList(
         renderPlot({
             F_rep = function(x){ if (x < 0) 0 else if (x < 1) 1 - input$bern_p else 1}
@@ -28,18 +28,24 @@ O_BernoulliFuncRep <- function(input){
 }
 
 
-Bernoulli <- function(id_rep, input, output, label = "Bernoulli"){
+DiscBernoulli <- function(id_rep, input, output, label = "DiscBernoulli"){
     tagList(
         fluidRow(
-            I_BernoulliParams(id_rep)
+            HTML(
+                "<h4 style='padding:15px; margin:0;'>Avem un experiment aleator si ne intereseaza realizarea sau nerealizarea lui.
+                            Fie sansa de realizare p.</h4>"
+            )
+        ), hr(),
+        fluidRow(
+            I_DiscBernoulliParams(id_rep)
         ), hr(),
         # FUNCTIA DE MASA: P(X = x)
         fluidRow(
-            O_BernoulliFuncMasa(input)
+            O_DiscBernoulliFuncMasa(input)
         ),
         # FUNCTIA DE REPARTITIE
         fluidRow(
-            O_BernoulliFuncRep(input)
+            O_DiscBernoulliFuncRep(input)
         )
     )
 }

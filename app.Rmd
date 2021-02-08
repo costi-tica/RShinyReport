@@ -4,31 +4,36 @@ title: Proiect Prob. si Stat.
 output: html_document
 author: Tica Constantin & Andronie Iustinian
 ---
-
-```{r setup, include=FALSE}
-source("Random Variables/Discrete/Binomiala.R")
-source("Random Variables/Discrete/Bernoulli.R")
-source("Random Variables/Discrete/Hipergeom.R")
-source("Random Variables/Discrete/Uniforma.R")
-source("Random Variables/Discrete/Geometrica.R")
-source("Random Variables/Discrete/NegativBinomiala.R")
-```
 ---
 
-```{r echo=FALSE}
+```{r setup, include=FALSE}
+source("Variabile Aleatoare/Discrete/Binomiala.R")
+source("Variabile Aleatoare/Discrete/Bernoulli.R")
+source("Variabile Aleatoare/Discrete/Hipergeom.R")
+source("Variabile Aleatoare/Discrete/Uniforma.R")
+source("Variabile Aleatoare/Discrete/Geometrica.R")
+source("Variabile Aleatoare/Discrete/NegativBinomiala.R")
+source("Variabile Aleatoare/Discrete/NegativHipergeom.R")
+source("Variabile Aleatoare/Discrete/Poisson.R")
+source("Variabile Aleatoare/Discrete/Logarithmic.R")
 
+source("Variabile Aleatoare/Continue/Uniforma.R")
+source("Variabile Aleatoare/Continue/Exponentiala.R")
+source("Variabile Aleatoare/Continue/Normala.R")
+source("Variabile Aleatoare/Continue/NormalaStandard.R")
+source("Variabile Aleatoare/Continue/LogNormala.R")
 ```
+
 
 
 ```{r echo=FALSE}
 fluidPage(
-    
     fluidRow(
         column(4,
                h3("Tipul Variabilei Aleatoare:")
         ),
         column(8, 
-               selectInput("vaType", "fgfdhdfh", c("Discreta" = "disc", "Continua" = "cont"))
+               selectInput("vaType", "", c("Discreta" = "disc", "Continua" = "cont"))
         )
     ),
     
@@ -38,7 +43,7 @@ fluidPage(
         
         fluidRow(
             column(4,
-                   h3("Tipul V.A. Discrete:")
+                   h3("V.A. discreta:")
             ),
             column(8, 
                    selectInput("vaDiscType", "",
@@ -47,20 +52,49 @@ fluidPage(
                                  "Hipergeometrica" = "hiper",
                                  "Uniforma"  = "unif",
                                  "Geometrica" = "geom",
-                                 "Bernoulli" = "bern"))
+                                 "Bernoulli" = "bern",
+                                 "Poisson" = "pois",
+                                 "Logaritmic" = "log",
+                                 "Negativ Hipergeometrica" = "nhiper"))
             )
-        ),
+        ), hr(),
         
-        conditionalPanel(condition = "input.vaDiscType == 'bern'", Bernoulli("bern", input, output)),
-        conditionalPanel(condition = "input.vaDiscType == 'binom'", Binomiala("binom", input, output)),
-        conditionalPanel(condition = "input.vaDiscType == 'hiper'", Hipergeom("hiper", input, output)),
-        conditionalPanel(condition = "input.vaDiscType == 'unif'", Uniforma("unif", input, output)),
-        conditionalPanel(condition = "input.vaDiscType == 'geom'", Geometrica("geom", input, output)),
-        conditionalPanel(condition = "input.vaDiscType == 'nbinom'", NegBinomiala("nbinom", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'bern'", DiscBernoulli("bern", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'binom'", DiscBinomiala("binom", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'hiper'", DiscHipergeom("hiper", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'unif'", DiscUniforma("unif", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'geom'", DiscGeometrica("geom", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'nbinom'", DiscNegBinomiala("nbinom", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'pois'", DiscPoisson("pois", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'log'", DiscLogarithmic("log", input, output)),
+        conditionalPanel(condition = "input.vaDiscType == 'nhiper'", DiscNegHipergeom("nhiper", input, output))
     ),
     
-    # MENIU CONTINUE
-    # CONTINUE
+    
+    conditionalPanel(
+        condition = "input.vaType == 'cont'",
+        
+        fluidRow(
+            column(4,
+                   h3("V.A. continua repartizata:")
+            ),
+            column(8, 
+                   selectInput("vaContType", "",
+                               c("Uniforma"  = "unif",
+                                 "Exponentiala"  = "exp",
+                                 "Normala"  = "norm",
+                                 "Normala Standard"  = "stnorm",
+                                 "Log Normala" = "lognorm"))
+            )
+        ), hr(),
+        
+        conditionalPanel(condition = "input.vaContType == 'unif'", ContUniforma("c_unif", input, output)),
+        conditionalPanel(condition = "input.vaContType == 'exp'", ContExpon("c_exp", input, output)),
+        conditionalPanel(condition = "input.vaContType == 'norm'", ContNormala("c_norm", input, output)),
+        conditionalPanel(condition = "input.vaContType == 'stnorm'", ContNormalaStand("c_stnorm", input, output)),
+        conditionalPanel(condition = "input.vaContType == 'lognorm'", ContLogNormala("c_lognorm", input, output)),
+    )
+    
 )
 ```
 

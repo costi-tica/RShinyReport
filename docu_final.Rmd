@@ -1,6 +1,70 @@
+---
+title: "Proiect Prob. si Stat. - Scurta Documentatie"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Descriere
+Aplicatia are ca scop vizualizarea si interpretarea mai multor repartitii pentru variabile aleatoare repartizate discret si continuu
+
+### Structura
+Aplicatia consista dintr-un meniu si un template pentru includerea repartitiilor.
+
+In principiu, pentru fiecare repartitie am creat un fisier in care am inclus absolut tot ce tine de ea. De la strctura in pagina pana la formulele de calclul. Am inclus conditionat toate aceste repartitii in app.Rmd (in functie de alegerea facuta in meniu)
+
+Fiecare repartitie este apelata si afisata printr-o functie principala care se geseste la sfarsitul codului (in fisierul rep. respective).
+
+Aceasta functie contine un mic template html pe linii, pe fiecare linie apelandu-se cate o functie care genereaza input sau output.
+
+Functiile repartitiilor au urmatoarea structura:
+
+a) incep cu I daca genereaza un input
+b) incep cu O daca genereaza un output
+c) incep cu IO daca genereaza si input si output
+
+Dupa acest prefix urmaza tipu repartitiei (‘disc’ sau ‘cont’) concatenat cu numele repartitiei si pincipalul scop pe care il are, astfel:
+
+a) ‘Prams’ - functie pentru input parametri repartitie
+b) ‘ProbA’ - functie pentru calculul P(X <= a)
+c) ‘ProbB’ - functie pentru calculul P(X >= b)
+d) ‘ProbCD’ - functie pentru calculul P(c <= X <= d)
+e) ‘FuncMasa’ - functie pentru afisarea graficului functiei de masa/densitate
+f) ‘FuncRep’ - functie pentru afisarea graficului func. de repartitie dar si graficului probabilitatilor de mai sus
+
+De exemplu: “IO_DiscNegBinomialaProbCD” - este o functie care genereaza input si output pentru o variabila discreta rep. negativ binomial, iar inputul si outputul generat sunt pentru probabilitatea P(c <= X <= d)
+
+### Input
+Pentru inputuri am folosit in general sliderInput si numericInput cu valori corespunzatoare fiecarei repartitii.
+
+```{r}
+# sliderInput(paste(id, "_m", sep =""), "m: (nr bile negre)", min = 0, max = 100, 30, 1)
+# numericInput(paste(id, "_c", sep =""),"x >= c:",46,0,200)
+```
+
+### Output
+Pentru grafice am folosit barplots si plots. Exemplu: (nu contine input deoarece nu rula)
+
+```{r}
+barplot(dnbinom(0:200, 15, 0.5),
+                names.arg = 0:200,
+                col = 'lightseagreen',
+                main = "Functia de Masa",
+        )
+```
+
+Pentru acest proiect am folosit doar limbajul R si biblioteca Shiny.
+
+### Pachete necesare: 'tolerance' si 'actuar'
+
+Codul pentru o repartitie are structura (exemplu repartitia discreta negativ binomiala):
+
+```{r}
 library(shiny)
 
-I_NegBinomialaParams <- function(id) {
+I_DiscNegBinomialaParams <- function(id) {
     tagList(
         # parametru R
         column(6, sliderInput(paste(id, "_r", sep =""), "r: (nr realizari) (X ~ nr de esecuri pana la r realizari (asa e default in R))", min = 1, max = 100, 15, 1)),
@@ -8,7 +72,7 @@ I_NegBinomialaParams <- function(id) {
         column(6, sliderInput(paste(id, "_p", sep =""), "p:", min = 0.01, max = 1, 0.2, 0.01))
     )
 }
-IO_NegBinomialaProbA <- function(id, input){
+IO_DiscNegBinomialaProbA <- function(id, input){
     tagList(
         # input a
         column(6, sliderInput(paste(id, "_a", sep =""), "P(x <= a):", min = 0, max = 200, 30, 1)),
@@ -18,7 +82,7 @@ IO_NegBinomialaProbA <- function(id, input){
         }))
     )
 }
-IO_NegBinomialaProbB <- function(id, input){
+IO_DiscNegBinomialaProbB <- function(id, input){
     tagList(
         # input b
         column(6, sliderInput(paste(id, "_b", sep =""),"P(x >= b):", min = 0, max = 200, 60, 1)), 
@@ -30,7 +94,7 @@ IO_NegBinomialaProbB <- function(id, input){
         }))
     )
 }
-IO_NegBinomialaProbCD <- function(id, input){
+IO_DiscNegBinomialaProbCD <- function(id, input){
     tagList(
         column(6,
                # input c
@@ -49,7 +113,7 @@ IO_NegBinomialaProbCD <- function(id, input){
         }))
     )
 }
-O_NegBinomialaFuncMasa <- function(input){
+O_DiscNegBinomialaFuncMasa <- function(input){
     renderPlot({
         barplot(dnbinom(0:200, input$nbinom_r, input$nbinom_p),
                 names.arg = 0:200,
@@ -58,7 +122,7 @@ O_NegBinomialaFuncMasa <- function(input){
         )
     })
 }
-O_NegBinomialaFuncRep <- function(input){
+O_DiscNegBinomialaFuncRep <- function(input){
     tagList(
         renderPlot({
             # graficul functiei de repartitie
@@ -96,44 +160,38 @@ O_NegBinomialaFuncRep <- function(input){
 }
 
 
-NegBinomiala <- function(id_rep, input, output, label = "NegBinomiala"){
+DiscNegBinomiala <- function(id_rep, input, output, label = "DiscNegBinomiala"){
     tagList(
         fluidRow(
-            I_NegBinomialaParams(id_rep)
+            HTML(
+                "<h4 style='padding:15px; margin:0;'>Fie A un eveniment si P(A) = p.
+                            Variabila aleatoare X defineste numarul de esecuri pana la realizarea even. A de r ori.</h4>"
+            )
+        ), hr(),
+        fluidRow(
+            I_DiscNegBinomialaParams(id_rep)
         ), hr(),
         # CALC PROB P(X <= a)
         fluidRow(
-            IO_NegBinomialaProbA(id_rep, input)
+            IO_DiscNegBinomialaProbA(id_rep, input)
         ),
         # CALC PROB P(X >= b)
         fluidRow(
-            IO_NegBinomialaProbB(id_rep, input)
+            IO_DiscNegBinomialaProbB(id_rep, input)
         ),
         # CALC PROB P(c <= X <= d)
         fluidRow(
-            IO_NegBinomialaProbCD(id_rep, input)
+            IO_DiscNegBinomialaProbCD(id_rep, input)
         ),
         # FUNCTIA DE MASA: P(X = x)
         fluidRow(
-            O_NegBinomialaFuncMasa(input)
+            O_DiscNegBinomialaFuncMasa(input)
         ),
         # FUNCTIA DE REPARTITIE
         fluidRow(
-            O_NegBinomialaFuncRep(input)
+            O_DiscNegBinomialaFuncRep(input)
         )
     )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 

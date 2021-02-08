@@ -1,6 +1,6 @@
 library(shiny)
 
-I_UniformaParams <- function(id) {
+I_DiscUniformaParams <- function(id) {
     tagList(
         # parametru N
         column(6, sliderInput(paste(id, "_n_left", sep =""), "marginea inferioara", min = -100, max = 100, 0, 1)),
@@ -8,55 +8,56 @@ I_UniformaParams <- function(id) {
         column(6, sliderInput(paste(id, "_n_right", sep =""), "marginea superioara", min = -100, max = 100, 9, 1))
     )
 }
-IO_UniformaProbA <- function(id, input){
+IO_DiscUniformaProbA <- function(id, input){
     tagList(
         # input a
-        column(6, sliderInput(paste(id, "_a", sep =""), "P(x <= a):", min = -100, max = 100, 3, 1)),
+        column(6, renderUI({
+            sliderInput(paste(id, "_a", sep =""), "P(x <= a):",
+                        min = input$unif_n_left, max = input$unif_n_right, value = input$unif_n_left + 1, 1)
+        })),
         # output
         column(6, br(), br(), renderPrint({
-               if (input$unif_a >= input$unif_n_left && input$unif_a <= input$unif_n_right)
-                   p = (input$unif_a - input$unif_n_left + 1) / (input$unif_n_right - input$unif_n_left + 1)
-               else 
-                   p = "Parametru invalid"
+               p = (input$unif_a - input$unif_n_left + 1) / (input$unif_n_right - input$unif_n_left + 1)
                paste("P(X <= ", input$unif_a, ") = ",  p)
         }))
     )
 }
-IO_UniformaProbB <- function(id, input){
+IO_DiscUniformaProbB <- function(id, input){
     tagList(
         # input b
-        column(6, sliderInput(paste(id, "_b", sep =""),"P(x >= b):", min = -100, max = 100, 6, 1)), 
+        column(6, renderUI({
+            sliderInput(paste(id, "_b", sep =""),"P(x >= b):",min = input$unif_n_left, max = input$unif_n_right, value = input$unif_n_right - 1, 1)
+        })), 
         # output 
         column(6, br(), br(), renderPrint({
-               if (input$unif_b >=  input$unif_n_left && input$unif_b <= input$unif_n_right)
-                   p = (input$unif_n_right - input$unif_b + 1) / (input$unif_n_right - input$unif_n_left + 1)
-               else 
-                   p = "Parametru invalid"
+               p = (input$unif_n_right - input$unif_b + 1) / (input$unif_n_right - input$unif_n_left + 1)
                paste("P(X >= ", input$unif_b, ") = ",  p)
         }))
     )
 }
-IO_UniformaProbCD <- function(id, input){
+IO_DiscUniformaProbCD <- function(id, input){
     tagList(
         column(6,
                # input c
-               column(4, numericInput(paste(id, "_c", sep =""),"x >= c:", 4, -100, 100)),
+               column(4, renderUI({
+                   numericInput(paste(id, "_c", sep =""),"x >= c:", min = input$unif_n_left, max = input$unif_n_right, value = input$unif_n_left + 1)
+               })),
                # input d
-               column(4, numericInput(paste(id, "_d", sep =""),"x <= d:", 8, -100, 100))    
+               column(4, renderUI({
+                   numericInput(paste(id, "_d", sep =""),"x <= d:", min = input$unif_n_left, max = input$unif_n_right, value = input$unif_n_right - 1)    
+               }))
         ),
         # output
         column(6, br(), renderPrint({
-               if (input$unif_c >= input$unif_n_left && input$unif_d <= input$unif_n_right
-                   && input$unif_c < input$unif_d){
-                   
+               if (input$unif_c <= input$unif_d){
                    p = (input$unif_d - input$unif_c + 1) / (input$unif_n_right - input$unif_n_left + 1)
                } else 
-                   p = "Paramerii invalizi"
+                   p = "Input invalid"
                paste("P(", input$unif_c, " <= X <=", input$unif_d, ")= ", p)
         }))
     )
 }
-O_UniformaFuncMasa <- function(input){
+O_DiscUniformaFuncMasa <- function(input){
     renderPlot({
         if (input$unif_n_left <= input$unif_n_right){
             px = 1 / (input$unif_n_right - input$unif_n_left + 1)
@@ -68,7 +69,7 @@ O_UniformaFuncMasa <- function(input){
         }
     })
 }
-O_UniformaFuncRep <- function(input){
+O_DiscUniformaFuncRep <- function(input){
     tagList(
         # Func de repartitie
         renderPlot({
@@ -85,9 +86,6 @@ O_UniformaFuncRep <- function(input){
         }),
         # Probabilitatile
         renderPlot({
-            if (input$unif_n_left <= input$unif_n_right && input$unif_a >= input$unif_n_left && input$unif_b <= input$unif_n_right 
-                && input$unif_c <= input$unif_d && input$unif_c >= input$unif_n_left && input$unif_d <= input$unif_n_right){
-                
                 p = rep(1 / (input$unif_n_right - input$unif_n_left + 1), input$unif_n_right - input$unif_n_left + 1)
                 #P(X <= a)
                 colA1 = rep("orange", input$unif_a - input$unif_n_left + 1)
@@ -98,46 +96,58 @@ O_UniformaFuncRep <- function(input){
                 colB2 = rep("purple", input$unif_n_right - input$unif_b + 1)
                 colFinalB = c(colB1, colB2)
                 # P(c <= X <= d)
-                colCD1 = rep("red", input$unif_c - input$unif_n_left)
-                colCD2 = rep("green", input$unif_d - input$unif_c + 1)
-                colCD3 = rep("red", input$unif_n_right - input$unif_d)
-                colFinalCD = c(colCD1, colCD2, colCD3)
+                if (input$unif_c <= input$unif_d){
+                    colCD1 = rep("red", input$unif_c - input$unif_n_left)
+                    colCD2 = rep("green", input$unif_d - input$unif_c + 1)
+                    colCD3 = rep("red", input$unif_n_right - input$unif_d)
+                    colFinalCD = c(colCD1, colCD2, colCD3)
+                    
+                    legendCD = paste("P(", input$unif_c,  "<= X <=",  input$unif_d, ")")
+                } else {
+                    colFinalCD = rep("red", input$unif_n_right - input$unif_n_left + 1)
+                    legendCD = "Input invalid"
+                }
                 # Grafic
                 barplot(cbind(p, p, p), beside = T, col = c(colFinalA, colFinalB, colFinalCD), 
                         names.arg = c(input$unif_n_left:input$unif_n_right, input$unif_n_left:input$unif_n_right, input$unif_n_left:input$unif_n_right),
                         main = "Probabilitati")
                 legend("topright", c(paste("P( X <= ", input$unif_a, ")"), paste("P( X >=", input$unif_b,  ")"), 
-                                     paste("P(", input$unif_c,  "<= X <=",  input$unif_d, ")")), fill=c("orange","purple","green"))
-            }
+                                     legendCD), fill=c("orange","purple","green"))
         })
     )
 }
 
 
-Uniforma <- function(id_rep, input, output, label = "Binomiala"){
+DiscUniforma <- function(id_rep, input, output, label = "DiscUniforma"){
     tagList(
         fluidRow(
-            I_UniformaParams(id_rep)
+            HTML(
+                "<h4 style='padding:15px; margin:0;'>Fie un interval numarabil dat de limita inferioara si limita superioara.
+                            Spunem ca v.a. X este repartizata uniform daca pentru orice numar x din interval avem aceeasi prob. P(X = x) = 1/(lungime interval).</h4>"
+            )
+        ), hr(),
+        fluidRow(
+            I_DiscUniformaParams(id_rep)
         ), hr(),
         # CALC PROB P(X <= a)
         fluidRow(
-            IO_UniformaProbA(id_rep, input)
+            IO_DiscUniformaProbA(id_rep, input)
         ),
         # CALC PROB P(X >= b)
         fluidRow(
-            IO_UniformaProbB(id_rep, input)
+            IO_DiscUniformaProbB(id_rep, input)
         ),
         # CALC PROB P(c <= X <= d)
         fluidRow(
-            IO_UniformaProbCD(id_rep, input)
+            IO_DiscUniformaProbCD(id_rep, input)
         ),
         # FUNCTIA DE MASA: P(X = x)
         fluidRow(
-            O_UniformaFuncMasa(input)
+            O_DiscUniformaFuncMasa(input)
         ),
         # FUNCTIA DE REPARTITIE
         fluidRow(
-            O_UniformaFuncRep(input)
+            O_DiscUniformaFuncRep(input)
         )
     )
 }
